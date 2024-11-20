@@ -1,16 +1,22 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
 
 settings = get_settings()
 
-# PostgreSQL async engine
+# PostgreSQL async engine with Neon optimizations
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=True,
     future=True,
+    poolclass=NullPool,  # Serverless ortam için connection pooling'i devre dışı bırak
+    connect_args={
+        "ssl": True,
+        "connect_timeout": 10  # Connection timeout'u düşür
+    }
 )
 
 # Async session factory
